@@ -30,9 +30,8 @@ backend-test:
     - cd server
     - go install gotest.tools/gotestsum@latest
     - go mod tidy
-    - cd $CI_PROJECT_DIR
   script:
-    - just test-server
+    - CGO_ENABLED=1 gotestsum --junitfile report.xml --format testname -- -coverprofile=cover.out ./...
   artifacts:
     when: always
     reports:
