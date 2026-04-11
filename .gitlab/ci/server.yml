@@ -31,7 +31,7 @@ backend-test:
     - go install gotest.tools/gotestsum@latest
     - go mod tidy
   script:
-    - just test
+    - just test-server
   artifacts:
     when: always
     reports:
