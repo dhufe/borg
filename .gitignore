@@ -39,3 +39,7 @@
 
 # allow justfile for building images
 !justfile
+
+# allow CI yaml files for Gitlab CI 
+!.gitlab/gitlab-ci.yml
+!.gitlab/ci/server.yml
