@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	DEFAULT_RESPONSE = "Borg server version %s is running"
-	FILE_STORE_PATH  = "/borg/file-store"
+	DefaultResponse = "Borg server version %s is running"
+	FileStorePath   = "/borg/file-store"
 )
 
 var version = os.Getenv("BORG_VERSION")
@@ -34,13 +34,16 @@ type fileAnalysis struct {
 }
 
 func main() {
-	log.Printf(DEFAULT_RESPONSE, version)
+	log.Printf(DefaultResponse, version)
 	initServer()
 	router := gin.Default()
 	router.MaxMultipartMemory = 3000 << 20 // 3 GiB
 	// Allow cors to integrate Borg in other applications.
 	router.ForwardedByClientIP = true
-	router.SetTrustedProxies([]string{"*"})
+	if err := router.SetTrustedProxies([]string{"*"}); err != nil {
+		log.Printf("Failed to set trusted proxies: %v", err)
+		return
+	}
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"*"}
 	corsConfig.AllowHeaders = []string{"Origin", "Content-Type"}
@@ -50,7 +53,10 @@ func main() {
 	router.GET("api", getDefaultResponse)
 	router.GET("api/version", getVersion)
 	router.POST("api/analyze", analyzeFile)
-	router.Run()
+	err := router.Run()
+	if err != nil {
+		return
+	}
 }
 
 func initServer() {
@@ -58,7 +64,7 @@ func initServer() {
 }
 
 func getDefaultResponse(c *gin.Context) {
-	c.String(http.StatusOK, fmt.Sprintf(DEFAULT_RESPONSE, version))
+	c.String(http.StatusOK, fmt.Sprintf(DefaultResponse, version))
 }
 
 func getVersion(c *gin.Context) {
@@ -77,7 +83,7 @@ func analyzeFile(c *gin.Context) {
 	}
 	// generate unique file name for storing
 	filename := uuid.New().String() + "_" + file.Filename
-	fileStorePath := filepath.Join(FILE_STORE_PATH, filename)
+	fileStorePath := filepath.Join(FileStorePath, filename)
 	err = c.SaveUploadedFile(file, fileStorePath)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -85,7 +91,13 @@ func analyzeFile(c *gin.Context) {
 		})
 		return
 	}
-	defer os.Remove(fileStorePath)
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			log.Println(err)
+		}
+	}(fileStorePath)
+
 	identResults := internal.RunIdentificationTools(filename)
 	triggeredResults := internal.RunTriggeredTools(filename, identResults)
 	toolResults := internal.CombineToolResults(identResults, triggeredResults)
