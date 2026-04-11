@@ -1,0 +1,39 @@
+server-lint:
+  image: ${GITLAB_DEPENDENCY_PROXY}golangci/golangci-lint:v$GOLANGCI_LINT_VERSION
+  tags: [ docker ]
+  rules:
+    - changes:
+        - backend/**/*
+    - exists:
+        - '**/*.go'
+  stage: lint
+  script:
+    # Write the code coverage report to gl-code-quality-report.json
+    # and print linting issues to stdout in the format: path/to/file:line description
+    # add `--issues-exit-code 0` to ignore linting issues
+    - cd server
+    - go mod tidy
+    - golangci-lint run --output.text.path=stdout --output.text.colors=false --output.text.print-issued-lines=false --output.code-climate.path=gl-code-quality-report.json
+  artifacts:
+    reports:
+      codequality: server/gl-code-quality-report.json
+    paths:
+      - server/gl-code-quality-report.json
+  allow_failure: true
+
+backend-test:
+  image: docker.io/golang:1.25.7-alpine
+  tags: [docker]
+  stage: test
+  before_script:
+    - apk update --no-cache && apk add --no-cache just gcc gcc musl-dev
+    - cd server
+    - go install gotest.tools/gotestsum@latest
+    - go mod tidy
+  script:
+    - just test
+  artifacts:
+    when: always
+    reports:
+      junit: server/report.xml
+

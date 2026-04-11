@@ -1,0 +1,12 @@
+stages:
+  - lint
+  - test
+  - build
+  - release
+
+variables:
+  GOLANGCI_LINT_VERSION: '2.8.0'
+
+include:
+  - local: .gitlab/ci/server.yml
+
