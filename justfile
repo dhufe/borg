@@ -32,6 +32,37 @@ push-tools:
 		podman push "{{IMAGE_PREFIX}}/$tool:{{IMAGE_VERSION}}"; \
 	done
 
+# Start podman compose
+podman-up:
+    podman-compose up -d --build
+
+# Stop podman compose
+podman-down:
+    podman-compose down
+
+# Show podman logs
+podman-logs:
+    podman-compose logs -f
+
+# Run linter of server code
+[working-directory: 'server']
+lint-server:
+    golangci-lint run \
+        --output.text.path=stdout \
+        --output.text.colors=false \
+        --output.text.print-issued-lines=false \
+        --output.code-climate.path=gl-code-quality-report.json
+
+# Run tests for server component
+[working-directory: 'server']
+test-server:
+    # CGO_ENABLED=1 -> SQLite wird für Tests benötigt.
+    CGO_ENABLED=1 gotestsum \
+        --junitfile report.xml \
+        --format testname \
+        -- -coverprofile=cover.out ./...
+
+
 push-all: push-server push-gui push-tools
 
 build-and-push-all: build-all push-all
