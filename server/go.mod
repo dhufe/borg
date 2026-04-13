@@ -6,9 +6,14 @@ require (
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.10.1
 	gopkg.in/yaml.v3 v3.0.1
+	gorm.io/gorm v1.31.1
 )
 
-require github.com/kr/text v0.2.0 // indirect
+require (
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/kr/text v0.2.0 // indirect
+)
 
 require (
 	github.com/bytedance/sonic v1.13.3 // indirect
