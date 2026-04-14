@@ -1,4 +1,4 @@
-package persistence
+package repositories
 
 import (
 	"context"
@@ -10,6 +10,31 @@ import (
 
 type JobRepository struct {
 	db *gorm.DB
+}
+
+func (j JobRepository) FindPendingTasks(ctx context.Context, tasks *[]model.Job) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (j JobRepository) FindTasksForCleanUp(ctx context.Context) ([]model.Job, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (j JobRepository) Count(ctx context.Context) (int, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (j JobRepository) CountByStatus(ctx context.Context, status model.JobStatus) (int, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (j JobRepository) CountByAllStatuses(ctx context.Context) (map[model.JobStatus]int, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (j JobRepository) FindById(ctx context.Context, id uint) (model.Job, error) {
