@@ -55,6 +55,7 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 			return
 		}
 
+		// TODO: Filehandling mit gegenchecken.
 		fileName := uuid.New().String() + "_" + file.Filename
 		request.FileName = filepath.Join(h.service.FileStoragePath(), fileName)
 		request.Type = tmp.Type
@@ -110,8 +111,8 @@ func (h *TaskHandler) GetTask(c *gin.Context) {
 	c.JSON(http.StatusOK, task)
 }
 
-func (h *TaskHandler) GetAllTasks(c *gin.Context) {
-	tasks, err := h.service.GetAllTasks(c.Request.Context())
+func (h *TaskHandler) GetAllJobs(c *gin.Context) {
+	tasks, err := h.service.GetAllJobs(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
